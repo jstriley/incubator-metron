@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 
 public class BasicCheckpointTrafficParser extends BasicParser {
 
@@ -96,6 +97,19 @@ public class BasicCheckpointTrafficParser extends BasicParser {
                 if(split[0].equals("time")){
                     dateFormat.setTimeZone(TimeZone.getTimeZone("America/New_York"));
                     payload.put("timestamp", dateFormat.parse(split[1]).getTime());
+                }else if(split[0].equals("__policy_id_tag")){
+                    split[1] = split[1].substring(0, split[1].length()-1); //remove the surrounding square bracket
+                    String[] policySplit = split[1].split(";|\\[");
+                    for(String key : policySplit){
+                        String[] policyValues = key.split("=",2);
+                        policyValues[0] = policyValues[0].replaceAll("[^\\._a-zA-Z0-9]+","");
+                        payload.put(policyValues[0], policyValues[1]);
+                        if(policyValues[0].equals("policy_name")){
+                            policyValues[1] = policyValues[1].replaceFirst("\\]$", "");
+                        }
+
+                    }
+
                 }else{
                     split[0] = split[0].replaceAll("[^\\._a-zA-Z0-9]+","");
                     payload.put(split[0], split[1]);
