@@ -28,10 +28,12 @@ import java.util.*;
 
 public class BasicLenelBadgeParser extends BasicParser {
 
+	// contains human readable replacement keys
 	private static final Map<String, String> keyMap;
 	static {
 		Map<String, String> map = new HashMap<>();
 		map.put("PANEL_ID","panel_id");
+		map.put("BADGE_READR_DVIC_NM","badge_reader_device_name");
 		map.put("PANEL_EVT_ID","panel_event_id");
 		map.put("BLDG_NUM","building_number");
 		map.put("BLDG_NM","building_name");
@@ -111,6 +113,13 @@ public class BasicLenelBadgeParser extends BasicParser {
 					// format keys
 					String key = keyMap.get(kvp[0].trim());
 					// remove quotes that surround values
+					String value = kvp[1];
+					payload.put(key, value.substring(1, value.length()-1));
+				}
+				// if a new field is added to the log format, its key should be added to the keyMap
+				// to avoid data loss in the meantime, this case is handled here
+				else if (kvp.length == 2){
+					String key = kvp[0].trim().toLowerCase();
 					String value = kvp[1];
 					payload.put(key, value.substring(1, value.length()-1));
 				}
