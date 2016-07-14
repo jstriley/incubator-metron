@@ -76,7 +76,11 @@ public class BasicCheckpointTrafficParserTest extends TestCase {
 		assertEquals(checkpointJson.get("if_name"), "bond12.3198");
 		assertEquals(checkpointJson.get("service_id"), "TCP-8500");
 		assertEquals(checkpointJson.get("action"), "accept");
-		assertEquals(checkpointJson.get("__policy_id_tag"), "product=VPN-1 & FireWall-1[db_tag={00000051-00CD-004F-9539-AB555A5BC669};mgmt=Ravenwood_KDC3;date=1464667243;policy_name=3pecd-current]");
+		assertEquals(checkpointJson.get("product"), "VPN-1 & FireWall-1");
+		assertEquals(checkpointJson.get("db_tag"), "{00000051-00CD-004F-9539-AB555A5BC669}");
+		assertEquals(checkpointJson.get("mgmt"), "Ravenwood_KDC3");
+		assertEquals(checkpointJson.get("date"), "1464667243");
+		assertEquals(checkpointJson.get("policy_name"),"3pecd-current");
 		assertEquals(checkpointJson.get("ip_src_addr"), "60.70.149.131");
 		assertEquals(checkpointJson.get("timestamp"), 1464814103000L);
     }
