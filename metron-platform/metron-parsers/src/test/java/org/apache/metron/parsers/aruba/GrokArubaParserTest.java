@@ -26,14 +26,13 @@ import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import junit.framework.Assert;
-
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class GrokArubaParserTest {
-	
+
 	private Map<String, Object> parserConfig;
-	
+
 	@Before
 	public void setup() {
 		parserConfig = new HashMap<>();
@@ -41,11 +40,11 @@ public class GrokArubaParserTest {
 		parserConfig.put("patternLabel", "ARUBA");
 		parserConfig.put("dateFormat", "yyyy-MM-dd HH:mm:ss");
 	}
-	
+
 	//Tests a well-formed Aruba line
 	@Test
 	public void testParseSampleLine() throws Exception {
-		
+
 		//Set up parser, parse message
 		GrokArubaParser parser = new GrokArubaParser();
 		parser.configure(parserConfig);
@@ -55,19 +54,19 @@ public class GrokArubaParserTest {
 		List<JSONObject> result = parser.parse(testString.getBytes());
 		JSONObject parsedJSON = result.get(0);
 
-    Assert.assertEquals(parsedJSON.get("priority"), 143);
-		Assert.assertEquals(parsedJSON.get("ip_src_addr"), "110.137.3.2");
-		Assert.assertEquals(parsedJSON.get("category"), "CPPM_Session_Detail");
-		Assert.assertEquals(parsedJSON.get("message_id"), 473964876);
-		Assert.assertEquals(parsedJSON.get("timestamp") , 1461904051000L);
-		Assert.assertEquals(parsedJSON.get("attr_name"), "Radius:IETF:User-Name");
-		Assert.assertEquals(parsedJSON.get("session_id"), "R011cf48e-04-57231aa3");
-		Assert.assertEquals(parsedJSON.get("message_id"), 473964876);
-		Assert.assertEquals(parsedJSON.get("id"), "5983679670");
-		Assert.assertEquals(parsedJSON.get("type"), "RADIUS_IN");
-		Assert.assertEquals(parsedJSON.get("request_timestamp"), "2016-04-29 04:26:13.002367-04");
-  }
-	
+		assertEquals(parsedJSON.get("priority"), 143);
+		assertEquals(parsedJSON.get("ip_src_addr"), "110.137.3.2");
+		assertEquals(parsedJSON.get("category"), "CPPM_Session_Detail");
+		assertEquals(parsedJSON.get("message_id"), 473964876);
+		assertEquals(parsedJSON.get("timestamp") , 1461904051000L);
+		assertEquals(parsedJSON.get("attr_name"), "Radius:IETF:User-Name");
+		assertEquals(parsedJSON.get("session_id"), "R011cf48e-04-57231aa3");
+		assertEquals(parsedJSON.get("message_id"), 473964876);
+		assertEquals(parsedJSON.get("id"), "5983679670");
+		assertEquals(parsedJSON.get("type"), "RADIUS_IN");
+		assertEquals(parsedJSON.get("request_timestamp"), "2016-04-29 04:26:13.002367-04");
+	}
+
 	//Tests a malformed Aruba message; parser should return null
 	@Test
 	public void testParseMalformedLine() throws Exception {
@@ -86,7 +85,7 @@ public class GrokArubaParserTest {
 		}
 		assertTrue(hitException);
 	}
-	
+
 	//Tests a blank Aruba message; parser should return null
 	@Test
 	public void testParseEmptyLine() throws Exception {
