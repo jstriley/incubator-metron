@@ -19,7 +19,9 @@
 package org.apache.metron.parsers.aruba;
 
 import java.text.ParseException;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.apache.metron.parsers.GrokParser;
 import org.json.simple.JSONObject;
@@ -43,20 +45,6 @@ public class GrokArubaParser extends GrokParser {
 		}
 
 		parseCSVSection(message);
-		sanitizeKeys(message);
-	}
-
-	private void sanitizeKeys(JSONObject json) {
-		for (Object obj : json.keySet()) {
-			if (obj instanceof String) {
-				String key = obj.toString();
-				if (key.contains(".")) {
-					String cleanKey = key.replace(".", "_");
-					json.put(cleanKey, json.get(key));
-					json.remove(key);
-				}
-			}
-		}
 	}
 
 	private void parseCSVSection(JSONObject json) {
@@ -65,12 +53,29 @@ public class GrokArubaParser extends GrokParser {
 			String[] split = message.split(",");
 			for (int i = 0; i < split.length; i++) {
 				String[] messageSplit = split[i].split("=");
-				// Timestamp contains a comma within it so the whole timestamp is across 2 sections of the csv split
-				if ("Timestamp".equals(messageSplit[0])) {
+				// '.' is an not allowed in elasticseach for keys. Replace occurrences of '.' with '_'.
+				messageSplit[0] = messageSplit[0].replace(".", "_");
+				if (messageSplit.length == 1) {
+					json.put(messageSplit[0], "");
+					// Timestamp contains a comma within it so the whole timestamp is across 2 sections of the csv split
+				} else if ("Timestamp".equals(messageSplit[0])) {
 					String timestampFull = messageSplit[1] + split[++i];
 					json.put("request_timestamp", timestampFull);
 				} else if ("timestamp".equals(messageSplit[0])) {
 					json.put("request_timestamp", messageSplit[1]);
+					// Common.Roles can have multiple items separated by commas
+					// EXample: Common.Roles=[Machine·Authenticated],·[User·Authenticated]
+				} else if ("Common.Roles".equals(messageSplit[0])) {
+					StringBuilder sb = new StringBuilder();
+					sb.append(messageSplit[1]);
+					// get all elements other elements of Common.Roles
+					int count = 0;
+					for (int numberOfElements = i; numberOfElements < split.length - 1 && split[numberOfElements + 1].trim().charAt(0) == '['; numberOfElements++) {
+						sb.append(", " + split[numberOfElements + 1]);
+						count++;
+					}
+					i += count; // update i to be the next value in the csv section
+					json.put(messageSplit[0], sb.toString());
 				} else {
 					json.put(messageSplit[0], messageSplit[1]);
 				}
