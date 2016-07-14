@@ -1,0 +1,7 @@
+{
+  "index": "generic_syslog",
+  "batchSize": 200,
+  "enrichment": {
+  }
+}
+
