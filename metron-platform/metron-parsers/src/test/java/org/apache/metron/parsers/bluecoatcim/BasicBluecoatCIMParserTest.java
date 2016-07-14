@@ -71,6 +71,7 @@ public class BasicBluecoatCIMParserTest {
 			assertEquals(jo.get("category"), "Web Ads/Analytics");
 		}
 		catch (Exception e){
+			System.out.println(e);
 			fail();
 		}
 	}
@@ -122,6 +123,7 @@ public class BasicBluecoatCIMParserTest {
 			assertEquals(json.get("category"), "Web Ads/Analytics");
 			assertEquals(json.get("user"), "abc123");
 		} catch (Exception e) {
+			System.out.println(e);
 			fail();
 		}
 	}
