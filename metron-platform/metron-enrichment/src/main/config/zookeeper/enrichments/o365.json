@@ -1,5 +1,5 @@
 {
-  "index": "office365",
+  "index": "o365",
   "batchSize": 1000,
   "enrichment": {
   }
