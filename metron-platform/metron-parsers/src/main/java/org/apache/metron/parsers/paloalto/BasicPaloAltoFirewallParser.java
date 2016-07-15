@@ -152,7 +152,8 @@ public class BasicPaloAltoFirewallParser extends BasicParser {
             "deviceGroupHierarchyLevel4",
             "virtualSystemName",
             "deviceName",
-            "futureUse5"};
+            "futureUse5",
+            "futureUse6"};
 
     private static final String[] CONFIG_FIELDS = {
             "receiveTime",
@@ -253,8 +254,11 @@ public class BasicPaloAltoFirewallParser extends BasicParser {
         int numFields = fields.length;
         int numTokens = tokens.size() - 1;
         int count;
-        for(count = 0; count < numTokens; count++)
-            outputMessage.put(fields[count],tokens.get(count+1));
+        for(count = 0; count < numTokens; count++){
+          System.out.println("Field: " + fields[count]);
+          System.out.println("Token: " + tokens.get(count+1));
+          outputMessage.put(fields[count],tokens.get(count+1));
+        }
 
         for(; count < numFields; count++)
             outputMessage.put(fields[count],"");
