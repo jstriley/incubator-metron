@@ -43,7 +43,7 @@ public class GrokArubaParserTest {
 
 	//Tests a well-formed Aruba line
 	@Test
-	public void testParseSampleLine() throws Exception {
+	public void testParseSampleLine() {
 
 		//Set up parser, parse message
 		GrokArubaParser parser = new GrokArubaParser();
@@ -58,7 +58,7 @@ public class GrokArubaParserTest {
 		assertEquals(parsedJSON.get("ip_src_addr"), "110.137.3.2");
 		assertEquals(parsedJSON.get("category"), "CPPM_Session_Detail");
 		assertEquals(parsedJSON.get("message_id"), 473964876);
-		assertEquals(parsedJSON.get("timestamp") , 1461904051000L);
+		assertEquals(parsedJSON.get("timestamp"), 1461904051000L);
 		assertEquals(parsedJSON.get("attr_name"), "Radius:IETF:User-Name");
 		assertEquals(parsedJSON.get("session_id"), "R011cf48e-04-57231aa3");
 		assertEquals(parsedJSON.get("message_id"), 473964876);
@@ -69,7 +69,7 @@ public class GrokArubaParserTest {
 
 	//Tests a malformed Aruba message; parser should return null
 	@Test
-	public void testParseMalformedLine() throws Exception {
+	public void testParseMalformedLine() {
 		//Set up parser, attempt to parse message
 		GrokArubaParser parser = new GrokArubaParser();
 		parser.configure(parserConfig);
@@ -88,7 +88,7 @@ public class GrokArubaParserTest {
 
 	//Tests a blank Aruba message; parser should return null
 	@Test
-	public void testParseEmptyLine() throws Exception {
+	public void testParseEmptyLine() {
 		//Set up parser, attempt to parse message
 		GrokArubaParser parser = new GrokArubaParser();
 		parser.configure(parserConfig);
