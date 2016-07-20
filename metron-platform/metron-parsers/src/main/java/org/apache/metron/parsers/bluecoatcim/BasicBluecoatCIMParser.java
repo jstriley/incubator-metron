@@ -58,16 +58,16 @@ public class BasicBluecoatCIMParser extends BasicParser {
 			// some values in the pipe delimited bluecoat cim logs contain pipes
 			// parse and remove them first to avoid problems parsing the rest of the string
 			String[] array;
-			array = handleValueContainingDelimiter(message, "url", "|dest=");
+			array = handleValueContainingDelimiter(message, "|url=", "|dest=");
 			message = array[0];
 			payload.put("url", array[1]);
-			array = handleValueContainingDelimiter(message, "uri_path", "|uri_query=");
+			array = handleValueContainingDelimiter(message, "|uri_path=", "|uri_query=");
 			message = array[0];
 			payload.put("uri_path", array[1]);
-			array = handleValueContainingDelimiter(message, "uri_query", "|uri_extension=");
+			array = handleValueContainingDelimiter(message, "|uri_query=", "|uri_extension=");
 			message = array[0];
 			payload.put("uri_query", array[1]);
-			array = handleValueContainingDelimiter(message, "http_referrer", "|status=");
+			array = handleValueContainingDelimiter(message, "|http_referrer=", "|status=");
 			message = array[0];
 			payload.put("http_referrer", array[1]);
 
@@ -107,11 +107,21 @@ public class BasicBluecoatCIMParser extends BasicParser {
 	private String[] handleValueContainingDelimiter(String message, String key, String nextKey){
 		if (message.contains(key)) {
 			int keyStart = message.indexOf(key);
-			int valueStart = keyStart + key.length() + 1;
+			int valueStart = keyStart + key.length();
 			int valueEnd = message.indexOf(nextKey);
-			String value = message.substring(valueStart, valueEnd);
-			String newMessage = message.substring(0, keyStart - 1) + message.substring(valueEnd);
-			return new String[]{newMessage, value};
+			if (valueEnd > valueStart) {
+				String value = message.substring(valueStart, valueEnd);
+				String newMessage = message.substring(0, keyStart) + message.substring(valueEnd);
+				return new String[]{newMessage, value};
+			}
+			else {
+				String errorString = "Unable to parse message due to improper bluecoat-cim field order. '"
+						+ nextKey.substring(1,nextKey.length()-1) + "' should directly follow '"
+						+ key.substring(1,key.length()-1)
+						+ "'. Message:\n" + message;
+				LOG.error(errorString);
+				throw new IllegalStateException(errorString);
+			}
 		}
 		else {
 			return new String[] {message, "-"};
