@@ -71,6 +71,8 @@ public class BasicBluecoatCIMParserTest {
 			assertEquals(jo.get("uri_port"), "123");
 			assertEquals(jo.get("time"), "1 13:58");
 			assertEquals(jo.get("category"), "Web Ads/Analytics");
+
+			System.out.println(result);
 		}
 		catch (Exception e){
 			System.out.println(e);
@@ -124,6 +126,8 @@ public class BasicBluecoatCIMParserTest {
 			assertEquals(json.get("time"), "1 13:59");
 			assertEquals(json.get("category"), "Web Ads/Analytics");
 			assertEquals(json.get("user"), "abc123");
+
+			System.out.println(result);
 		} catch (Exception e) {
 			System.out.println(e);
 			fail();
@@ -138,8 +142,8 @@ public class BasicBluecoatCIMParserTest {
 		try {
 			result = parser.parse(testString.getBytes());
 			System.out.println(result.get(0));
-		} catch (Exception e) {
 		}
+		catch (Exception e) {}
 		assertNull(result);
 	}
 }
