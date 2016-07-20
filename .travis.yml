@@ -3,4 +3,7 @@ jdk:
   - oraclejdk8
 script:
   - |
-    mvn apache-rat:check && cd metron-platform && mvn -q integration-test package
+    mvn -q integration-test install
+cache:
+  directories:
+  - $HOME/.m2

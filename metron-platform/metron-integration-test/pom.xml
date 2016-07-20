@@ -18,7 +18,7 @@
   <parent>
     <groupId>org.apache.metron</groupId>
     <artifactId>metron-platform</artifactId>
-    <version>0.1BETA</version>
+    <version>0.2.0BETA</version>
   </parent>
   <artifactId>metron-integration-test</artifactId>
   <description>Metron Integration Test</description>
@@ -143,18 +143,8 @@
     </dependency>
     <dependency>
       <groupId>org.apache.metron</groupId>
-      <artifactId>metron-enrichment</artifactId>
-      <version>0.1BETA</version>
-    </dependency>
-    <!--dependency>
-      <groupId>org.apache.metron</groupId>
-      <artifactId>metron-parsers</artifactId>
-      <version>0.1BETA</version>
-    </dependency-->
-    <dependency>
-      <groupId>org.apache.metron</groupId>
       <artifactId>metron-test-utilities</artifactId>
-      <version>0.1BETA</version>
+      <version>${project.parent.version}</version>
     </dependency>
   </dependencies>
   <build>

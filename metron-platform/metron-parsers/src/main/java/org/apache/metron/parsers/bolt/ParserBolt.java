@@ -26,62 +26,38 @@ import backtype.storm.tuple.Values;
 import org.apache.metron.common.Constants;
 import org.apache.metron.common.bolt.ConfiguredParserBolt;
 import org.apache.metron.common.configuration.FieldValidator;
-import org.apache.metron.common.configuration.ParserConfigurations;
-import org.apache.metron.common.configuration.writer.ParserWriterConfiguration;
-import org.apache.metron.common.configuration.writer.SingleBatchConfigurationFacade;
-import org.apache.metron.common.configuration.writer.WriterConfiguration;
-import org.apache.metron.common.interfaces.BulkMessageWriter;
-import org.apache.metron.common.writer.BulkWriterComponent;
-import org.apache.metron.common.writer.WriterToBulkWriter;
 import org.apache.metron.common.configuration.SensorParserConfig;
 import org.apache.metron.parsers.filters.Filters;
 import org.apache.metron.common.configuration.FieldTransformer;
-import org.apache.metron.common.configuration.SensorParserConfig;
 import org.apache.metron.parsers.filters.GenericMessageFilter;
 import org.apache.metron.common.utils.ErrorUtils;
 import org.apache.metron.parsers.interfaces.MessageFilter;
 import org.apache.metron.parsers.interfaces.MessageParser;
-import org.apache.metron.common.interfaces.MessageWriter;
 import org.json.simple.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.function.Function;
 
 public class ParserBolt extends ConfiguredParserBolt implements Serializable {
 
+  private static final Logger LOG = LoggerFactory.getLogger(ParserBolt.class);
   private OutputCollector collector;
   private MessageParser<JSONObject> parser;
   private MessageFilter<JSONObject> filter = new GenericMessageFilter();
-  private transient Function<ParserConfigurations, WriterConfiguration> writerTransformer;
-  private BulkMessageWriter<JSONObject> messageWriter;
-  private BulkWriterComponent<JSONObject> writerComponent;
-  private boolean isBulk = false;
+  private WriterHandler writer;
   public ParserBolt( String zookeeperUrl
                    , String sensorType
                    , MessageParser<JSONObject> parser
-                   , MessageWriter<JSONObject> writer
+                   , WriterHandler writer
   )
   {
     super(zookeeperUrl, sensorType);
-    isBulk = false;
+    this.writer = writer;
     this.parser = parser;
-    messageWriter = new WriterToBulkWriter<>(writer);
   }
 
-  public ParserBolt( String zookeeperUrl
-                   , String sensorType
-                   , MessageParser<JSONObject> parser
-                   , BulkMessageWriter<JSONObject> writer
-  )
-  {
-    super(zookeeperUrl, sensorType);
-    isBulk = true;
-    this.parser = parser;
-    messageWriter = writer;
-
-
-  }
 
   public ParserBolt withMessageFilter(MessageFilter<JSONObject> filter) {
     this.filter = filter;
@@ -103,23 +79,8 @@ public class ParserBolt extends ConfiguredParserBolt implements Serializable {
     }
     parser.init();
 
-    if(isBulk) {
-      writerTransformer = config -> new ParserWriterConfiguration(config);
-    }
-    else {
-      writerTransformer = config -> new SingleBatchConfigurationFacade(new ParserWriterConfiguration(config));
-    }
-    try {
-      messageWriter.init(stormConf, writerTransformer.apply(getConfigurations()));
-    } catch (Exception e) {
-      throw new IllegalStateException("Unable to initialize message writer", e);
-    }
-    this.writerComponent = new BulkWriterComponent<JSONObject>(collector, isBulk, isBulk) {
-      @Override
-      protected Collection<Tuple> createTupleCollection() {
-        return new HashSet<>();
-      }
-    };
+    writer.init(stormConf, collector, getConfigurations());
+
     SensorParserConfig config = getSensorParserConfig();
     if(config != null) {
       config.init();
@@ -139,7 +100,7 @@ public class ParserBolt extends ConfiguredParserBolt implements Serializable {
     try {
       //we want to ack the tuple in the situation where we have are not doing a bulk write
       //otherwise we want to defer to the writerComponent who will ack on bulk commit.
-      boolean ackTuple = !isBulk;
+      boolean ackTuple = !writer.handleAck();
       int numWritten = 0;
       if(sensorParserConfig != null) {
         List<FieldValidator> fieldValidations = getConfigurations().getFieldValidations();
@@ -152,13 +113,13 @@ public class ParserBolt extends ConfiguredParserBolt implements Serializable {
                 handler.transformAndUpdate(message, sensorParserConfig.getParserConfig());
               }
             }
+            numWritten++;
             if(!isGloballyValid(message, fieldValidations)) {
               message.put(Constants.SENSOR_TYPE, getSensorType()+ ".invalid");
               collector.emit(Constants.INVALID_STREAM, new Values(message));
             }
             else {
-              numWritten++;
-              writerComponent.write(getSensorType(), tuple, message, messageWriter, writerTransformer.apply(getConfigurations()));
+              writer.write(getSensorType(), tuple, message, getConfigurations());
             }
           }
         }
@@ -170,7 +131,12 @@ public class ParserBolt extends ConfiguredParserBolt implements Serializable {
         collector.ack(tuple);
       }
     } catch (Throwable ex) {
-      ErrorUtils.handleError(collector, ex, Constants.ERROR_STREAM);
+      ErrorUtils.handleError( collector
+                            , ex
+                            , Constants.ERROR_STREAM
+                            , Optional.of(getSensorType())
+                            , Optional.ofNullable(originalMessage)
+                            );
       collector.ack(tuple);
     }
   }

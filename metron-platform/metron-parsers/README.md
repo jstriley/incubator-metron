@@ -84,7 +84,7 @@ unconditionally:
     "fieldTransformations" : [
           {
             "input" : "field1"
-          , "mapping" : "REMOVE"
+          , "transformation" : "REMOVE"
           }
                       ]
 }
@@ -98,7 +98,7 @@ whenever `field2` exists and whose corresponding equal to 'foo':
   "fieldTransformations" : [
           {
             "input" : "field1"
-          , "mapping" : "REMOVE"
+          , "transformation" : "REMOVE"
           , "config" : {
               "condition" : "exists(field2) and field2 == 'foo'"
                        }
@@ -125,6 +125,42 @@ to a textual representation of the protocol:
 
 This transformation would transform `{ "protocol" : 6, "source.type" : "bro", ... }` 
 into `{ "protocol" : "TCP", "source.type" : "bro", ...}`
+
+* `MTL` : This transformation executes a set of transformations expressed as [Metron Transformation Language](../metron-common) statements.
+
+Consider the following sensor parser config to add three new fields to a
+message:
+* `utc_timestamp` : The unix epoch timestamp based on the `timestamp` field, a `dc` field which is the data center the message comes from and a `dc2tz` map mapping data centers to timezones
+* `url_host` : The host associated with the url in the `url` field
+* `url_protocol` : The protocol associated with the url in the `url` field
+
+```
+{
+...
+    "fieldTransformations" : [
+          {
+           "transformation" : "MTL"
+          ,"output" : [ "utc_timestamp", "url_host", "url_protocol" ]
+          ,"config" : {
+            "utc_timestamp" : "TO_EPOCH_TIMESTAMP(timestamp, 'yyyy-MM-dd
+HH:mm:ss', MAP_GET(dc, dc2tz, 'UTC') )"
+           ,"url_host" : "URL_TO_HOST(url)"
+           ,"url_protocol" : "URL_TO_PROTOCOL(url)"
+                      }
+          }
+                      ]
+   ,"parserConfig" : {
+      "dc2tz" : {
+                "nyc" : "EST"
+               ,"la" : "PST"
+               ,"london" : "UTC"
+                }
+    }
+}
+```
+
+Note that the `dc2tz` map is in the parser config, so it is accessible
+in the functions.
 
 ###An Example Configuration for a Sensor
 Consider the following example configuration for the `yaf` sensor:
@@ -201,27 +237,73 @@ The usage for `start_parser_topology.sh` is as follows:
 
 ```
 usage: start_parser_topology.sh
- -e,--extra_options <JSON_FILE>               Extra options in the form of
-                                              a JSON file with a map for
-                                              content.
- -h,--help                                    This screen
- -k,--kafka <BROKER_URL>                      Kafka Broker URL
- -mt,--message_timeout <TIMEOUT_IN_SECS>      Message Timeout in Seconds
- -mtp,--max_task_parallelism <MAX_TASK>       Max task parallelism
- -na,--num_ackers <NUM_ACKERS>                Number of Ackers
- -nw,--num_workers <NUM_WORKERS>              Number of Workers
- -pnt,--parser_num_tasks <PARSER_NUM_TASKS>   Parser Num Tasks
- -pp,--parser_p <PARSER_PARALLELISM_HINT>     Parser Parallelism Hint
- -s,--sensor <SENSOR_TYPE>                    Sensor Type
- -snt,--spout_num_tasks <NUM_TASKS>           Spout Num Tasks
- -sp,--spout_p <SPOUT_PARALLELISM_HINT>       Spout Parallelism Hint
- -t,--test <TEST>                             Run in Test Mode
- -z,--zk <ZK_QUORUM>                          Zookeeper Quroum URL
-                                              (zk1:2181,zk2:2181,...
+ -e,--extra_topology_options <JSON_FILE>        Extra options in the form
+                                                of a JSON file with a map
+                                                for content.
+ -esc,--extra_kafka_spout_config <JSON_FILE>    Extra spout config options
+                                                in the form of a JSON file
+                                                with a map for content.
+                                                Possible keys are:
+                                                retryDelayMaxMs,retryDelay
+                                                Multiplier,retryInitialDel
+                                                ayMs,stateUpdateIntervalMs
+                                                ,bufferSizeBytes,fetchMaxW
+                                                ait,fetchSizeBytes,maxOffs
+                                                etBehind,metricsTimeBucket
+                                                SizeInSecs,socketTimeoutMs
+ -ewnt,--error_writer_num_tasks <NUM_TASKS>     Error Writer Num Tasks
+ -ewp,--error_writer_p <PARALLELISM_HINT>       Error Writer Parallelism
+                                                Hint
+ -h,--help                                      This screen
+ -iwnt,--invalid_writer_num_tasks <NUM_TASKS>   Invalid Writer Num Tasks
+ -iwp,--invalid_writer_p <PARALLELISM_HINT>     Invalid Message Writer
+                                                Parallelism Hint
+ -k,--kafka <BROKER_URL>                        Kafka Broker URL
+ -mt,--message_timeout <TIMEOUT_IN_SECS>        Message Timeout in Seconds
+ -mtp,--max_task_parallelism <MAX_TASK>         Max task parallelism
+ -na,--num_ackers <NUM_ACKERS>                  Number of Ackers
+ -nw,--num_workers <NUM_WORKERS>                Number of Workers
+ -pnt,--parser_num_tasks <NUM_TASKS>            Parser Num Tasks
+ -pp,--parser_p <PARALLELISM_HINT>              Parser Parallelism Hint
+ -s,--sensor <SENSOR_TYPE>                      Sensor Type
+ -snt,--spout_num_tasks <NUM_TASKS>             Spout Num Tasks
+ -sp,--spout_p <SPOUT_PARALLELISM_HINT>         Spout Parallelism Hint
+ -t,--test <TEST>                               Run in Test Mode
+ -z,--zk <ZK_QUORUM>                            Zookeeper Quroum URL
+                                                (zk1:2181,zk2:2181,...
 ```
 
-A small note on the extra options.  These options are intended to be Storm configuration options and will live in
-a JSON file which will be loaded into the Storm config.  For instance, if you wanted to set some storm property on
+# The `--extra_kafka_spout_config` Option
+These options are intended to configure the Storm Kafka Spout more completely.  These options can be
+specified in a JSON file containing a map associating the kafka spout configuration parameter to a value.
+The range of values possible to configure are:
+* retryDelayMaxMs
+* retryDelayMultiplier
+* retryInitialDelayMs
+* stateUpdateIntervalMs
+* bufferSizeBytes
+* fetchMaxWait
+* fetchSizeBytes
+* maxOffsetBehind
+* metricsTimeBucketSizeInSecs
+* socketTimeoutMs
+
+These are described in some detail [here](https://docs.hortonworks.com/HDPDocuments/HDP2/HDP-2.3.4/bk_storm-user-guide/content/storm-kafka-api-ref.html).
+
+For instance, creating a JSON file which will set the `bufferSizeBytes` to 2MB and `retryDelayMaxMs` to 2000 would look like
+```
+{
+  "bufferSizeBytes" : 2000000,
+  "retryDelayMaxMs" : 2000
+}
+```
+
+This would be loaded by passing the file as argument to `--extra_kafka_spout_config`
+
+# The `--extra_topology_options` Option
+
+These options are intended to be Storm configuration options and will live in
+a JSON file which will be loaded into the Storm config.  For instance, if you wanted to set a storm property on
 the config called `topology.ticks.tuple.freq.secs` to 1000 and `storm.local.dir` to `/opt/my/path`
 you could create a file called `custom_config.json` containing 
 ```
@@ -230,4 +312,4 @@ you could create a file called `custom_config.json` containing
   "storm.local.dir" : "/opt/my/path"
 }
 ```
-and pass `--extra_options custom_config.json` to `start_parser_topology.sh`.
+and pass `--extra_topology_options custom_config.json` to `start_parser_topology.sh`.

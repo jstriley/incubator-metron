@@ -75,6 +75,11 @@ public class ParserTopologyComponent implements InMemoryComponent {
                                                                    , 1
                                                                    , 1
                                                                    , 1
+                                                                   , 1
+                                                                   , 1
+                                                                   , 1
+                                                                   , 1
+                                                                   , null
                                                                    );
       Map<String, Object> stormConf = new HashMap<>();
       stormConf.put(Config.TOPOLOGY_DEBUG, true);
@@ -87,6 +92,8 @@ public class ParserTopologyComponent implements InMemoryComponent {
 
   @Override
   public void stop() {
-    stormCluster.shutdown();
+    if(stormCluster != null) {
+      stormCluster.shutdown();
+    }
   }
 }
