@@ -76,11 +76,53 @@ public class GrokArubaParser extends GrokParser {
 					}
 					i += count; // update i to be the next value in the csv section
 					json.put(messageSplit[0], sb.toString());
+				} else if ("fingerprint".equals(messageSplit[0])) {
+					try {
+						StringBuilder sb = new StringBuilder();
+						sb.append(messageSplit[1]);
+						int bracketCount = getNetBracketCount(messageSplit[1]); // keep track of whether we are still in the json or not.
+						int count = 0; // keep track of how many elements of split we use for fingerprint
+						int numberOfElements = i;
+						boolean inOption = false;
+						String current;
+						while (bracketCount > 0) { // should never be less than 0, but  use > 0 just in case of malformed json
+							if (numberOfElements < split.length - 1 && !(split[numberOfElements + 1].contains("="))) {
+								current = split[numberOfElements++ + 1].trim();
+								count++;
+								sb.append(", " + current);
+								bracketCount += getNetBracketCount(current);
+							}
+						}
+						i += count;
+						String toPut = sb.toString();
+						while (toPut.matches(".+\\d+, \\d+.+")) {
+							toPut = toPut.replaceAll("(\\d+), (\\d+)", "$1,$2");
+						}
+						json.put(messageSplit[0], toPut);
+					} catch (Exception e) {
+						// if an error occurs, likely due to a malformed nested json, just store the default
+						json.put(messageSplit[0], messageSplit[1]);
+					}
 				} else {
 					json.put(messageSplit[0], messageSplit[1]);
 				}
 			}
 		}
+	}
+
+	private int getNetBracketCount(String stringFragment) {
+		int bracketCount = 0;
+		for (int i = 0; i < stringFragment.length(); i++) {
+			switch (stringFragment.charAt(i)) {
+				case '{':
+					bracketCount++;
+					break;
+				case '}':
+					bracketCount--;
+					break;
+			}
+		}
+		return bracketCount;
 	}
 
 	//Removes any keys with empty or null values
