@@ -44,7 +44,7 @@ public class SampleDataValidation implements ParserValidation {
         ValidationUtils.assertJSONEqual(expectedMessage, actualMessage);
       } catch (Throwable t) {
         System.out.println("expected: " + expectedMessage);
-        System.out.println("actual: " + actualMessage);
+        System.out.println("actual:   " + actualMessage);
         throw t;
       }
     }
