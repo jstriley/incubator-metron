@@ -34,9 +34,6 @@ import org.junit.Test;
 
 public class ActiveDirectoryParserTest {
 
-    private final String dateFormat = "yyyy MMM dd HH:mm:ss";
-    private final String timestampField = "timestamp_string";
-
     @Test
     public void testParseLoginLine() throws Exception {
 

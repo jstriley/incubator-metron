@@ -33,9 +33,6 @@ import static org.junit.Assert.*;
 
 public class WindowsSyslogParserTest {
 
-	private final String dateFormat = "yyyy MMM dd HH:mm:ss";
-	private final String timestampField = "timestamp_string";
-
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(WindowsSyslogParserTest.class);
 

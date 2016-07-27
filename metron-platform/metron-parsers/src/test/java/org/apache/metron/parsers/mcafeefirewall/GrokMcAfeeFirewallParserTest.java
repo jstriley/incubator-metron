@@ -18,7 +18,6 @@
 
 package org.apache.metron.parsers.mcafeefirewall;
 
-import org.apache.metron.parsers.websphere.GrokWebSphereParser;
 import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
