@@ -30,9 +30,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class GrokArubaParserTest {
-	
+
 	private Map<String, Object> parserConfig;
-	
+
 	@Before
 	public void setup() {
 		parserConfig = new HashMap<>();
@@ -40,7 +40,7 @@ public class GrokArubaParserTest {
 		parserConfig.put("patternLabel", "ARUBA");
 		parserConfig.put("dateFormat", "yyyy-MM-dd HH:mm:ss");
 	}
-	
+
 	//Tests a well-formed Aruba line
 	@Test
 	public void testParseSampleLine() {
@@ -84,7 +84,7 @@ public class GrokArubaParserTest {
 		}
 		assertTrue(hitException);
 	}
-	
+
 	//Tests a blank Aruba message; parser should return null
 	@Test
 	public void testParseEmptyLine() {
