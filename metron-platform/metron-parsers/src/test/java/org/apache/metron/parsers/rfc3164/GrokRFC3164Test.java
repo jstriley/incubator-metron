@@ -18,8 +18,6 @@
 
 package org.apache.metron.parsers.rfc3164;
 
-import oi.thekraken.grok.api.Grok;
-import org.apache.metron.parsers.websphere.GrokWebSphereParser;
 import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,9 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class GrokRFC3164Test {
 

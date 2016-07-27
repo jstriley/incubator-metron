@@ -17,12 +17,11 @@
  */
 package org.apache.metron.parsers.paloalto;
 
+import com.google.common.collect.ImmutableMap;
 import org.json.simple.JSONObject;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
-import com.google.common.collect.ImmutableMap;
 
 import static org.junit.Assert.*;
 

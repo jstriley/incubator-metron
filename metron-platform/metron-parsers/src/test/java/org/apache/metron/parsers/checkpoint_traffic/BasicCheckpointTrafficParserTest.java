@@ -18,14 +18,9 @@
 package org.apache.metron.parsers.checkpoint_traffic;
 
 import junit.framework.TestCase;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.Map;
 
 public class BasicCheckpointTrafficParserTest extends TestCase {
 

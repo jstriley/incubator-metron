@@ -18,7 +18,6 @@
 
 package org.apache.metron.parsers.bigip;
 
-import org.apache.metron.parsers.bigip.GrokBigIpParser;
 import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;

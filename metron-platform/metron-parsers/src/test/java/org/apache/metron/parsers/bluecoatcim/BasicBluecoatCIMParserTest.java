@@ -17,7 +17,6 @@
  */
 package org.apache.metron.parsers.bluecoatcim;
 
-import org.apache.metron.parsers.activedirectory.ActiveDirectoryParser;
 import org.json.simple.JSONObject;
 import org.junit.Test;
 
