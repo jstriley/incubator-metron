@@ -55,7 +55,7 @@ public class BasicBluecoatParser extends BasicParser {
 		
 		try {
 			
-			String[] parts = message.split("<|>|\\(|\\)| ");
+			String[] parts = message.split("<|>|\\(|\\)|  | ");
 			payload.put("original_string", message);
 			payload.put("priority", parts[1]);
 			
