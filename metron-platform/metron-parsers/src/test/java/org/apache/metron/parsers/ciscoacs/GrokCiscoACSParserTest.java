@@ -51,9 +51,6 @@ public class GrokCiscoACSParserTest {
         List<JSONObject> result = parser.parse(testString.getBytes());
         JSONObject parsedJSON = result.get(0);
 
-        for (Object o : parsedJSON.keySet()) {
-            System.out.println(o.toString() + ": " + parsedJSON.get(o));
-        }
 
         //Compare fields
         assertEquals(parsedJSON.get("priority") + "", "181");
