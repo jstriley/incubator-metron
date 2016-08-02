@@ -48,7 +48,7 @@ public class GrokMcAfeeFirewallParserTest {
 		//Set up parser, parse message
 		GrokMcAfeeFirewallParser parser = new GrokMcAfeeFirewallParser();
 		parser.configure(parserConfig);
-		String testString = "<188>Apr 15 16:35:41 GMT mabm011q AclLog: mabm011q matched Outbound ACL rule (COM Baseline Firewall/#3) 60.210.64.70 -> 200.60.213.21:443 (ssl/SSL/TLS (HTTPS)) = ->PERMIT|N/A|N/A";
+		String testString = "<188>Apr  5 16:35:41 GMT mabm011q AclLog: mabm011q matched Outbound ACL rule (COM Baseline Firewall/#3) 60.210.64.70 -> 200.60.213.21:443 (ssl/SSL/TLS (HTTPS)) = ->PERMIT|N/A|N/A";
 		List<JSONObject> result = null;
 		try {
 			result = parser.parse(testString.getBytes());
@@ -59,7 +59,7 @@ public class GrokMcAfeeFirewallParserTest {
 		
 		//Compare fields
 		assertEquals(parsedJSON.get("priority") + "", "188");
-		assertEquals(parsedJSON.get("timestamp") + "", "1460738141000");
+		assertEquals(parsedJSON.get("timestamp") + "", "1459874141000");
 		assertEquals(parsedJSON.get("hostname"), "mabm011q");
 		assertEquals(parsedJSON.get("firewall_rule"), "COM Baseline Firewall/#3");
 		assertEquals(parsedJSON.get("firewall_direction"), "Outbound");
