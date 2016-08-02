@@ -410,6 +410,15 @@ public class CEFParser extends BasicParser {
 			json.put("fileSize", json.get("fsize"));
 			json.remove("fsize");
 		}
+		if (json.containsKey("filePath")){
+			String path = (String)json.get("filePath");
+			Pattern pattern = Pattern.compile("\\/[a-zA-z0-9]{16}-[0-9]-(.*)");
+			Matcher matcher = pattern.matcher(path);
+			if(matcher.find()){
+				json.put("fileName", matcher.group(1));
+			}
+
+		}
 		if (json.containsKey("in")) {
 			json.put("bytesIn", json.get("in"));
 			json.remove("in");
