@@ -35,7 +35,7 @@ public class BasicBluecoatParserTest {
 
 	@Test
 	public void test250017() {
-		String testString = "<29>Apr 15 16:46:33 ProxySG: 250017 Authentication failed from 10.118.29.228: user 'UZL193' (realm AD_ldap)(0) NORMAL_EVENT authutility.cpp 113";
+		String testString = "<29>Apr  5 16:46:33 ProxySG: 250017 Authentication failed from 10.118.29.228: user 'UZL193' (realm AD_ldap)(0) NORMAL_EVENT authutility.cpp 113";
 
 		List<JSONObject> result = bbp.parse(testString.getBytes());
 
