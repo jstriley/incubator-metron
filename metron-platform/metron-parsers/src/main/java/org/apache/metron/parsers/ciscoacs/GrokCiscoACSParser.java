@@ -340,29 +340,8 @@ public class GrokCiscoACSParser  extends GrokParser {
                 if("CmdSet".equals(pairArray[0].replaceAll("\\s+", "")))
                 {
                     String cmdSet = fields[i].substring(fields[i].indexOf("["));
-                    subPairArray = cmdSet.split(" ");
-                    String[] innerPairArray;
-
-                    int cmdArgAVCcounter = 0;
-
-                    for(int z = 0; z < subPairArray.length; z++)
-                    {
-                        if(subPairArray[z].contains("="))
-                        {
-                            innerPairArray = subPairArray[z].split("=");
-
-                            if("CmdArgAV".equals(innerPairArray[0].replaceAll("\\s+", "")))
-                            {
-                                cmdArgAV.put((innerPairArray[0]+""+cmdArgAVCcounter).replaceAll("\\s+", ""),innerPairArray[1].replaceAll("\\s+", ""));
-                                cmdArgAVCcounter++;
-                            }
-
-                            newPairs.put(innerPairArray[0].replaceAll("\\s+", ""),innerPairArray[1].replaceAll("\\s+", ""));
-                        }
-                    }
-                    newPairs.put(pairArray[0].replaceAll("\\s+", ""),cmdSet.replaceAll("\\s+", ""));
-                }
-                if("Response".equals(pairArray[0].replaceAll("\\s+", "")))
+                    newPairs.put(pairArray[0].replaceAll("\\s+", ""),cmdSet.trim());
+                }else if("Response".equals(pairArray[0].replaceAll("\\s+", "")))
                 {
                     String cmdSet = fields[i].substring(fields[i].indexOf("{")+1);
                     subPairArray = cmdSet.split(";");
@@ -398,7 +377,10 @@ public class GrokCiscoACSParser  extends GrokParser {
                 }
             }
 
-            newPairs.put("Response",cmdArgAV.toJSONString());
+            System.out.println(cmdArgAV.toJSONString());
+            if(!cmdArgAV.toJSONString().equals("{}")){
+                newPairs.put("Response",cmdArgAV.toJSONString());
+            }
             newPairs.put("Steps",steps.toJSONString());
 
             Set set = newPairs.entrySet();
@@ -411,7 +393,7 @@ public class GrokCiscoACSParser  extends GrokParser {
                     if ("Steps".equals(me.getKey().toString())) {
                         toReturn.put("Steps", steps);
                     } else {
-                        toReturn.put((me.getKey().toString()).replaceAll("\\s+", ""), (me.getValue().toString()).replaceAll("\\s+", "")); // add the field and value
+                        toReturn.put((me.getKey().toString()).replaceAll("\\s+", ""), (me.getValue().toString()).trim()); // add the field and value
                     }
                 }else {
                     toReturn.put((me.getKey().toString()), "EMPTY_FIELD");   // there was no value for this field
