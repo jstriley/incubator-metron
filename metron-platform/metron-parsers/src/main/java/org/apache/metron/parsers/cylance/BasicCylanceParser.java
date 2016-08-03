@@ -29,7 +29,6 @@ public class BasicCylanceParser extends BasicParser {
         try {
 
           String[] parts = message.split(",(?![^\\(\\[]*[\\]\\)])");
-          payload.put("source:type", "cylance");
 
           // deal with oddly formatted first part
           String[] firstRow = parts[0].split("<|>| ");
