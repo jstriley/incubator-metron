@@ -38,6 +38,7 @@ public class BasicCylanceParser extends BasicParser {
           Date date = df.parse(firstRow[2] + " " + firstRow[3] + " " + year + " " + firstRow[4]);
           long epoch = date.getTime();
 
+          payload.put("original_string", message);
           payload.put("priority", firstRow[1]);
           payload.put("timestamp", epoch);
           payload.put("hostname", firstRow[5]);
