@@ -41,7 +41,6 @@ public class BasicCylanceParserTest {
     JSONObject parsedJSON = result.get(0);
     System.out.println(parsedJSON);
 
-    assertEquals(parsedJSON.get("source:type"), "cylance");
     assertEquals(parsedJSON.get("priority"), "116");
     assertEquals(parsedJSON.get("timestamp"), 1468000120000L);
     assertEquals(parsedJSON.get("hostname"), "sysloghost");
@@ -71,7 +70,6 @@ public class BasicCylanceParserTest {
     JSONObject parsedJSON = result.get(0);
     System.out.println(parsedJSON);
 
-    assertEquals(parsedJSON.get("source:type"), "cylance");
     assertEquals(parsedJSON.get("priority"), "116");
     assertEquals(parsedJSON.get("timestamp"), 1468000062000L);
     assertEquals(parsedJSON.get("hostname"), "sysloghost");
@@ -99,7 +97,6 @@ public class BasicCylanceParserTest {
     JSONObject parsedJSON = result.get(0);
     System.out.println(parsedJSON);
 
-    assertEquals(parsedJSON.get("source:type"), "cylance");
     assertEquals(parsedJSON.get("priority"), "116");
     assertEquals(parsedJSON.get("timestamp"), 1468000042000L);
     assertEquals(parsedJSON.get("hostname"), "sysloghost");
@@ -128,7 +125,6 @@ public class BasicCylanceParserTest {
     JSONObject parsedJSON = result.get(0);
     System.out.println(parsedJSON);
 
-    assertEquals(parsedJSON.get("source:type"), "cylance");
     assertEquals(parsedJSON.get("priority"), "116");
     assertEquals(parsedJSON.get("timestamp"), 1468000230000L);
     assertEquals(parsedJSON.get("hostname"), "sysloghost");
