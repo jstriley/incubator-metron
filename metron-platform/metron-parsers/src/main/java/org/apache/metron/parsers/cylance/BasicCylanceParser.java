@@ -29,8 +29,6 @@ public class BasicCylanceParser extends BasicParser {
         try {
 
           String[] parts = message.split(",(?![^\\(\\[]*[\\]\\)])");
-
-          // deal with oddly formatted first part
           String[] firstRow = parts[0].split("<|>| ");
           int year = Calendar.getInstance().get(Calendar.YEAR);
           df.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -54,7 +52,6 @@ public class BasicCylanceParser extends BasicParser {
             valueSegments = Arrays.copyOfRange(parts, 1, parts.length);
           }
 
-          // deal with the rest of the parameters passed through
           for (int i = 0; i < valueSegments.length; i++){
             String[] keyValue = valueSegments[i].split(":", 2);
 
@@ -62,10 +59,10 @@ public class BasicCylanceParser extends BasicParser {
               payload.put(keyValue[0].toLowerCase().trim().replace(" ", "_"), keyValue[1].substring(0, keyValue[1].length() - 4).trim());
             }
             else if (!keyValue[1].trim().isEmpty() && keyValue[0].trim().equals("Path")){
-                payload.put(keyValue[0].toLowerCase().trim().replace(" ", "_"), keyValue[1].trim());
+              payload.put(keyValue[0].toLowerCase().trim().replace(" ", "_"), keyValue[1].trim());
             }
             else if (!keyValue[1].trim().isEmpty()) {
-                payload.put(keyValue[0].toLowerCase().trim().replace(" ", "_"), keyValue[1].replaceAll("[()]","").trim());
+              payload.put(keyValue[0].toLowerCase().trim().replace(" ", "_"), keyValue[1].replaceAll("[()]","").trim());
             }
           }
           LOGGER.debug("[Metron] Returning parsed message: " + payload);
