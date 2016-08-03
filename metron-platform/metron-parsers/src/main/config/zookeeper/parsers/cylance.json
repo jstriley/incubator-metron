@@ -1,0 +1,5 @@
+{
+  "parserClassName":"org.apache.metron.parsers.cylance.BasicCylanceParser",
+  "sensorTopic":"cylance",
+  "parserConfig": {}
+}
