@@ -412,10 +412,13 @@ public class CEFParser extends BasicParser {
 		}
 		if (json.containsKey("filePath")){
 			String path = (String)json.get("filePath");
-			Pattern pattern = Pattern.compile("\\/[a-zA-z0-9]{16}-[0-9]-(.*)");
+			Pattern pattern = Pattern.compile("\\/[a-zA-z0-9]{15,16}-[0-9]-(.*)");
 			Matcher matcher = pattern.matcher(path);
 			if(matcher.find()){
 				json.put("fileName", matcher.group(1));
+			}else{
+				String fileName = path.substring(path.lastIndexOf("/")+1);
+				json.put("fileName", fileName);
 			}
 
 		}
