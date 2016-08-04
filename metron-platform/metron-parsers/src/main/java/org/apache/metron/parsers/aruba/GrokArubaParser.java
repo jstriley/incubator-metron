@@ -85,12 +85,15 @@ public class GrokArubaParser extends GrokParser {
 						int numberOfElements = i;
 						boolean inOption = false;
 						String current;
-						while (bracketCount > 0) { // should never be less than 0, but  use > 0 just in case of malformed json
+						int counter = 0;
+						while (bracketCount > 0 && counter < split.length + 10) { // should never be less than 0, but  use > 0 just in case of malformed json
 							if (numberOfElements < split.length - 1 && !(split[numberOfElements + 1].contains("="))) {
 								current = split[numberOfElements++ + 1].trim();
 								count++;
 								sb.append(", " + current);
 								bracketCount += getNetBracketCount(current);
+							}else{
+								counter++;
 							}
 						}
 						i += count;
