@@ -1,0 +1,8 @@
+{
+  "parserClassName":"org.apache.metron.parsers.redseal.BasicRedsealParser",
+  "sensorTopic":"redseal",
+  "parserConfig":
+  {
+
+  }
+}
