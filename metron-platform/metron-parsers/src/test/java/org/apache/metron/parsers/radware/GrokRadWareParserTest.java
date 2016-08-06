@@ -42,6 +42,7 @@ public class GrokRadWareParserTest {
 
     }
 
+
     @Test
     public void testParseLoginLine() throws Exception {
 
@@ -76,4 +77,5 @@ public class GrokRadWareParserTest {
         assertEquals("drop", parsedJSON.get("action") + "");
         assertEquals("AAAAAAAAAAAA-AAAA-AD8B-0004555104DD", parsedJSON.get("unique_id") + "");
     }
+
 }
