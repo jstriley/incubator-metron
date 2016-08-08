@@ -77,5 +77,15 @@ public class GrokRadWareParserTest {
         assertEquals("drop", parsedJSON.get("action") + "");
         assertEquals("AAAAAAAAAAAA-AAAA-AD8B-0004555104DD", parsedJSON.get("unique_id") + "");
     }
+    @Test
+    public void testParseLoginLine1() throws Exception {
 
+        //Set up parser, parse message
+        GrokRadWareParser parser = new GrokRadWareParser();
+        parser.configure(parserConfig);
+        String testString = "<180>DefensePro: 15-04-2016 17:01:16 WARNING Certificate named DDosProtector expired on WED MAR 18 19:10:01 2015";
+        List<JSONObject> result = parser.parse(testString.getBytes());
+        JSONObject parsedJSON = result.get(0);
+        assertEquals("Certificate named DDosProtector expired on WED MAR 18 19:10:01 2015", parsedJSON.get("Message")+"");
+    }
 }

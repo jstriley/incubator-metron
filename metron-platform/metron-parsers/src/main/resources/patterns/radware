@@ -23,7 +23,7 @@ CATEGORY (%{WORD}(-%{WORD})*)
 STRING "(.*?)"
 
 #Log Start - first part of the log
-LOGSTART <%{NUMBER:priority}>%{WORD:UNWANTED}: %{TIMESTAMP:timestamp_string} %{WORD:severity} %{NUMBER:radwareID} %{CATEGORY:category} %{STRING:event_name} %{WORD:protocol}
+LOGSTART <%{NUMBER:priority}>%{WORD:UNWANTED}: %{TIMESTAMP:timestamp_string} %{WORD:severity}
 
 
 # Define IP address formats
@@ -31,18 +31,17 @@ IPV6 ((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9
 IPV4 (?<![0-9])(?:(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})[.](?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})[.](?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})[.](?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2}))(?![0-9])
 IP (?:%{IPV6:UNWANTED}|%{IPV4:UNWANTED})
 
-# LOGMID
-LOGMID %{IP:ipSrc} %{NUMBER:srcPort} %{IP:ipDest} %{NUMBER:destPort} %{NUMBER:physicalPort} %{WORD:context}
-
-#Message - the message body of the log
-ID .*
-
 # Tags Word or N/A
 TAG (\w|/)+
 
+# LOGMID
+LOGMID %{NUMBER:radwareID} %{CATEGORY:category} %{STRING:event_name} %{WORD:protocol} %{IP:ipSrc} %{NUMBER:srcPort} %{IP:ipDest} %{NUMBER:destPort} %{NUMBER:physicalPort} %{TAG:context}
+
+#Message - the message body of the log
+ID .*
 
 #LOGEND
 LOGEND %{STRING:policy} %{WORD:eventType} %{NUMBER:packetCount} %{NUMBER:bandwidth} %{TAG:vlanTag} %{NUMBER:mplsRd} %{TAG:mplsTag} %{WORD:risk} %{WORD:action} %{ID:unique_id}
 
 #RadWare - entire message
-RADWARE %{LOGSTART} %{LOGMID} %{LOGEND}
+RADWARE %{LOGSTART:UNWANTED} ((%{LOGMID:UNWANTED} %{LOGEND:UNWANTED})|%{ID:Message})
