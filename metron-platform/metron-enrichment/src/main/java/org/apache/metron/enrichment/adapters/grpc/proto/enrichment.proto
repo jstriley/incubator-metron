@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "org.apache.metron.enrichment.adapters.grpc.generated";
+option java_outer_classname = "GrpcEnrichment";
+
+package grpc;
+
+// The scoring service definition
+service Enrich {
+    rpc Enrich (EnrichRequest) returns (EnrichReply) {}
+}
+
+message EnrichRequest {
+    repeated Feature features = 1;
+    int64 timestamp = 2;
+}
+
+message EnrichReply {
+    double score = 1;
+}
+
+message Feature {
+    oneof numOrString {
+        double doubleFeature = 1;
+        string stringFeature = 2;
+    }
+}
