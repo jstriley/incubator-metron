@@ -159,11 +159,16 @@ public class GenericEnrichmentBolt extends ConfiguredEnrichmentBolt {
   @SuppressWarnings("unchecked")
   @Override
   public void execute(Tuple tuple) {
+
+    //Get the parsed JSON object from the Storm tuple
     String key = tuple.getStringByField("key");
     JSONObject rawMessage = (JSONObject) tuple.getValueByField("message");
 
+    //Create the enriched JSON object, timestamping it at the adapter level
     JSONObject enrichedMessage = new JSONObject();
     enrichedMessage.put("adapter." + adapter.getClass().getSimpleName().toLowerCase() + ".begin.ts", "" + System.currentTimeMillis());
+
+    //Check that the parsed message is not empty and contains a source type field
     try {
       if (rawMessage == null || rawMessage.isEmpty())
         throw new Exception("Could not parse binary stream to JSON");
@@ -176,6 +181,8 @@ public class GenericEnrichmentBolt extends ConfiguredEnrichmentBolt {
       else {
         throw new RuntimeException("Source type is missing from enrichment fragment: " + rawMessage.toJSONString());
       }
+
+      //Iterate through the fields of the JSON
       boolean error = false;
       for (Object o : rawMessage.keySet()) {
         String field = (String) o;
@@ -215,6 +222,7 @@ public class GenericEnrichmentBolt extends ConfiguredEnrichmentBolt {
         }
       }
 
+      //Timestamp the enriched message and emit it if not null or empty
       enrichedMessage.put("adapter." + adapter.getClass().getSimpleName().toLowerCase() + ".end.ts", "" + System.currentTimeMillis());
       if(error) {
         throw new Exception("Unable to enrich " + enrichedMessage + " check logs for specifics.");

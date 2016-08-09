@@ -62,7 +62,16 @@ public class EnrichmentJoinBolt extends JoinBolt<JSONObject> {
     return streamIds;
   }
 
-
+  /**
+   *
+   * Joins together a set of JSON objects into a single JSON object
+   *
+   * Used for taking enrichment fields and putting them into the
+   * same message as the original
+   *
+   * @param streamMessageMap
+   * @return a JSON object that is the joined messages
+   */
   @Override
   public JSONObject joinMessages(Map<String, JSONObject> streamMessageMap) {
     JSONObject message = new JSONObject();

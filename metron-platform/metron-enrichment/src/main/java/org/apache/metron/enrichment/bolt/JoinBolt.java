@@ -40,6 +40,11 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * A class to join together messages from different Storm streams
+ * The actual join logic is implemented in classes that extend JoinBolt,
+ * since message types may be different
+ */
 public abstract class JoinBolt<V> extends ConfiguredEnrichmentBolt {
 
   private static final Logger LOG = LoggerFactory
@@ -65,6 +70,13 @@ public abstract class JoinBolt<V> extends ConfiguredEnrichmentBolt {
     return this;
   }
 
+  /**
+   * Sets up the cache for the bolt
+   *
+   * @param map
+   * @param topologyContext
+   * @param outputCollector
+   */
   @Override
   public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
     super.prepare(map, topologyContext, outputCollector);
@@ -86,6 +98,15 @@ public abstract class JoinBolt<V> extends ConfiguredEnrichmentBolt {
     prepare(map, topologyContext);
   }
 
+  /**
+   * The execute method for the bolt, which performs the actual function
+   *
+   * This gets a tuple from the stream, checks how many messages there are
+   * for that tuple in the streams that it exists in
+   *
+   * Last, it calls the join method to merge the different messages into
+   * a single message
+   * */
   @SuppressWarnings("unchecked")
   @Override
   public void execute(Tuple tuple) {
