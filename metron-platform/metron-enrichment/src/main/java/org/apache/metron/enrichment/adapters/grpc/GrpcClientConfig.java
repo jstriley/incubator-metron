@@ -29,8 +29,9 @@ import java.io.Serializable;
  */
 public class GrpcClientConfig implements Serializable {
 
-  protected String host;
-  protected int port;
+  //Config fields must be public so that flux can access them
+  public String host;
+  public int port;
 
   public String getHost() {
     return host;

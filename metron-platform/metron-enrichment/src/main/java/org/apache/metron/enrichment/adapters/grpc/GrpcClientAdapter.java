@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 
+//TODO: Add tons of logging to this class and the other GRPC classes!
+
 package org.apache.metron.enrichment.adapters.grpc;
 
 import org.apache.metron.enrichment.adapters.grpc.generated.Feature;
@@ -33,7 +35,11 @@ public class GrpcClientAdapter implements EnrichmentAdapter<CacheKey>, Serializa
 
   protected EnrichmentClient client;
   protected GrpcClientConfig config;
-  protected static final Logger _LOG = LoggerFactory.getLogger(SimpleHBaseAdapter.class);
+  protected static final Logger _LOG = LoggerFactory.getLogger(GrpcClientAdapter.class.getName());
+
+  //Default values for host and port
+  final String DEFAULT_HOST = "localhost";
+  final int DEFAULT_PORT = 50051;
 
   public GrpcClientAdapter(){}
 
@@ -74,11 +80,23 @@ public class GrpcClientAdapter implements EnrichmentAdapter<CacheKey>, Serializa
 
     //Gets the string to send to the enrichment server
     String feature = value.getValue();
+    _LOG.info("Sending the following feature to the enrichment server: " + feature);
 
     //Gets the score from the enrichment server
-    double score = client.getEnrichment(feature);
+    double score = 0;
+    try {
+      score = client.getEnrichment(feature);
+    } catch (Exception e) {
+      _LOG.error("Exception thrown when trying to get enrichment score: " + e.getMessage(), e);
+    }
+
+    //Log unscored records
+    if (score == 0) {
+      _LOG.info("No score returned for feature " + feature);
+    }
 
     //Adds fields to the enrichment JSON to return
+    _LOG.info("Received the following score from the enrichment server: " + score);
     enriched.put("enrichment_timestamp", System.currentTimeMillis());
     enriched.put("feature", feature);
     enriched.put("score", score);
@@ -93,15 +111,44 @@ public class GrpcClientAdapter implements EnrichmentAdapter<CacheKey>, Serializa
    */
   @Override
   public boolean initializeAdapter() {
+
+    //Create the host and port variables
+    String host;
+    int port = 0;
+
+    //Try to set the port from the configuration object
+    //Use default value if it fails
     try {
-      String host = config.getHost();
-      int port = config.getPort();
-      client = new EnrichmentClient(host, port);
+      port = config.getPort();
     } catch (Exception e) {
-      _LOG.error("Unable to initialize adapter: " + e.getMessage(), e);
+      _LOG.warn("Port variable was not set in GRPC adapter");
+      _LOG.warn("Exception: " + e.getMessage(), e);
+      _LOG.warn("Initializing adapter with default port: 50051");
+      port = DEFAULT_PORT;
+    }
+
+    //Try to set the host from the configuration object
+    //Use defauly value if it fails
+    if (null == config.getHost()) {
+      _LOG.warn("Host variable was not set in GRPC adapter");
+      _LOG.warn("Initializing adapter with default host: localhost");
+      host=DEFAULT_HOST;
+    }
+    else {
+      host = config.getHost();
+    }
+
+    //Checks to ensure that host and port are set, fails otherwise
+    if (host==null || port == 0) {
+      _LOG.error("Could not initialize adapter. Host or port value was not set.");
       return false;
     }
+
+    //Initializes the GRPC client
+    _LOG.info("Intializing GRPC adapter to use " + host + ":" + port);
+    client = new EnrichmentClient(host, port);
     return true;
+
   }
 
   /**
@@ -120,6 +167,7 @@ public class GrpcClientAdapter implements EnrichmentAdapter<CacheKey>, Serializa
   @Override
   public void cleanup() {
     try {
+      _LOG.info("Shutting down GRPC client");
       client.shutdown();
     } catch (InterruptedException e) {
       _LOG.error("Could not shut down GRPC client properly due to: " + e.getMessage(), e);

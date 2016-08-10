@@ -70,7 +70,6 @@ components:
             -   "grpc"
             -   ref: "grpcEnrichmentAdapter"
     #Host enrichment
-    className:
     -   id: "hostEnrichmentAdapter"
         className: "org.apache.metron.enrichment.adapters.host.HostFromJSONListAdapter"
         constructorArgs:
@@ -518,6 +517,14 @@ streams:
 #        grouping:
 #            streamId: "message"
 #            type: SHUFFLE
+
+    #send data from enrichment joiner to the indexing bolt
+    -   name: "enrichmentJoinBolt -> indexingBolt"
+        from: "enrichmentJoinBolt"
+        to: "indexingBolt"
+        grouping:
+            streamId: "message"
+            type: SHUFFLE
 
     #send any errors from the indexing bolt to the error bolt
     -   name: "indexingBolt -> errorBolt"

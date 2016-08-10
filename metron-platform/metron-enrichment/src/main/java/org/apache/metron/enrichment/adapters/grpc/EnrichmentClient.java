@@ -47,6 +47,7 @@ public class EnrichmentClient {
       .usePlaintext(true)
       .build();
     blockingStub = EnrichGrpc.newBlockingStub(channel);
+    logger.info("Constructed EnrichmentClient for " + host + ":" + port);
   }
 
   public void shutdown() throws InterruptedException {
@@ -78,6 +79,7 @@ public class EnrichmentClient {
       logger.info("Contacting server");
       response = blockingStub.enrich(request);
       score = response.getScore();
+      logger.info("Server returned score: " + score);
     } catch (StatusRuntimeException e) {
       logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
     }
