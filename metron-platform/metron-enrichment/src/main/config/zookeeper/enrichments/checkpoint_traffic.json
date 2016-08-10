@@ -6,10 +6,6 @@
       "geo": [
         "ip_src_addr",
         "ip_dst_addr"
-      ],
-      "host": [
-        "ip_src_addr",
-        "ip_dst_addr"
       ]
     },
   "fieldToTypeMap": {

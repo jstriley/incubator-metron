@@ -22,6 +22,7 @@ config:
 
 components:
 # Enrichment
+    #Geo enrichment
     -   id: "jdbcConfig"
         className: "org.apache.metron.enrichment.adapters.jdbc.MySqlConfig"
         properties:
@@ -46,6 +47,30 @@ components:
         constructorArgs:
             -   "geo"
             -   ref: "geoEnrichmentAdapter"
+    #GRPC enrichment
+      #Create the config that the adapter will use, setting the appropriate variables
+    -   id: "grpcClientConfig"
+        className: "org.apache.metron.enrichment.adapters.grpc.GrpcClientConfig"
+        properties:
+            -   name: "host"
+                value: "localhost"
+            -   name: "port"
+                value: 50051
+      #Create the enrichment adapter using the config
+    -   id: "grpcEnrichmentAdapter"
+        className: "org.apache.metron.enrichment.adapters.grpc.GrpcClientAdapter"
+        configMethods:
+            -   name: "withConfig"
+                args:
+                    - ref: "grpcClientConfig"
+      #Create the enrichment object from the enrichment adapter
+    -   id: "grpcEnrichment"
+        className: "org.apache.metron.enrichment.configuration.Enrichment"
+        constructorArgs:
+            -   "grpc"
+            -   ref: "grpcEnrichmentAdapter"
+    #Host enrichment
+    className:
     -   id: "hostEnrichmentAdapter"
         className: "org.apache.metron.enrichment.adapters.host.HostFromJSONListAdapter"
         constructorArgs:
@@ -55,7 +80,7 @@ components:
         constructorArgs:
             -   "host"
             -   ref: "hostEnrichmentAdapter"
-
+    #HBase enrichment
     -   id: "simpleHBaseEnrichmentConfig"
         className: "org.apache.metron.enrichment.adapters.simplehbase.SimpleHBaseConfig"
         configMethods:
@@ -79,12 +104,17 @@ components:
         constructorArgs:
           -   "hbaseEnrichment"
           -   ref: "simpleHBaseEnrichmentAdapter"
+    #An arraylist of the enrichments to use
     -   id: "enrichments"
         className: "java.util.ArrayList"
-#        configMethods:
-#            -   name: "add"
-#                args:
-#                    - ref: "hostEnrichment"
+        configMethods:
+            -   name: "add"
+                args:
+                    - ref: "grpcEnrichment"
+            -   name: "add"
+                args:
+                    - ref: "geoEnrichment"
+#Commenting out other enrichments so that we only add GRPC and geo
 #            -   name: "add"
 #                args:
 #                    - ref: "hostEnrichment"
@@ -92,7 +122,6 @@ components:
 #                args:
 #                    - ref: "simpleHBaseEnrichment"
 # Threat Intel
-
     -   id: "simpleHBaseThreatIntelConfig"
         className: "org.apache.metron.enrichment.adapters.threatintel.ThreatIntelConfig"
         configMethods:
@@ -206,18 +235,36 @@ bolts:
                 args:
                     - ref: "enrichments"
         parallelism: 45
-#    -   id: "geoEnrichmentBolt"
-#        className: "org.apache.metron.enrichment.bolt.GenericEnrichmentBolt"
-#        constructorArgs:
-#            - "${kafka.zk}"
-#        configMethods:
-#            -   name: "withEnrichment"
-#                args:
-#                    - ref: "geoEnrichment"
-#            -   name: "withMaxCacheSize"
-#                args: [10000]
-#            -   name: "withMaxTimeRetain"
-#                args: [10]
+
+#The configs for the actual Storm bolts used in enrichment
+#They use the adapters and enrichment objects created above
+    #Geo Enrichment Bolt
+    -   id: "geoEnrichmentBolt"
+        className: "org.apache.metron.enrichment.bolt.GenericEnrichmentBolt"
+        constructorArgs:
+            - "${kafka.zk}"
+        configMethods:
+            -   name: "withEnrichment"
+                args:
+                    - ref: "geoEnrichment"
+            -   name: "withMaxCacheSize"
+                args: [10000]
+            -   name: "withMaxTimeRetain"
+                args: [10]
+    #GRPC Enrichment Bolt
+    -   id: "grpcEnrichmentBolt"
+        className: "org.apache.metron.enrichment.bolt.GenericEnrichmentBolt"
+        constructorArgs:
+            - "${kafka.zk}"
+        configMethods:
+            -   name: "withEnrichment"
+                args:
+                    - ref: "grpcEnrichment"
+            -   name: "withMaxCacheSize"
+                args: [10000]
+            -   name: "withMaxTimeRetain"
+                args: [10]
+    #Host Enrichment Bolt
 #    -   id: "hostEnrichmentBolt"
 #        className: "org.apache.metron.enrichment.bolt.GenericEnrichmentBolt"
 #        constructorArgs:
@@ -242,15 +289,17 @@ bolts:
 #                args: [10000]
 #            -   name: "withMaxTimeRetain"
 #                args: [10]
-#    -   id: "enrichmentJoinBolt"
-#        className: "org.apache.metron.enrichment.bolt.EnrichmentJoinBolt"
-#        constructorArgs:
-#            - "${kafka.zk}"
-#        configMethods:
-#            -   name: "withMaxCacheSize"
-#                args: [10000]
-#            -   name: "withMaxTimeRetain"
-#                args: [10]
+#
+#The Enrichment Join Bolt
+    -   id: "enrichmentJoinBolt"
+        className: "org.apache.metron.enrichment.bolt.EnrichmentJoinBolt"
+        constructorArgs:
+            - "${kafka.zk}"
+        configMethods:
+            -   name: "withMaxCacheSize"
+                args: [10000]
+            -   name: "withMaxTimeRetain"
+                args: [10]
 #
 ## Threat Intel Bolts
 #    -   id: "threatIntelSplitBolt"
@@ -315,6 +364,8 @@ bolts:
 
 streams:
 #parser
+    #get the parsed data from the kafka spout to the splitter
+    #to send the data to the enrichment bolts
     -   name: "spout -> splitter"
         from: "kafkaSpout"
         to: "enrichmentSplitBolt"
@@ -322,6 +373,7 @@ streams:
             type: SHUFFLE
 
 #enrichment
+     #send the data to be enriched from the splitter to the host adapter
 #    -   name: "enrichmentSplit -> host"
 #        from: "enrichmentSplitBolt"
 #        to: "hostEnrichmentBolt"
@@ -329,14 +381,23 @@ streams:
 #            streamId: "host"
 #            type: FIELDS
 #            args: ["key"]
-#    -   name: "enrichmentSplit -> geo"
-#        from: "enrichmentSplitBolt"
-#        to: "geoEnrichmentBolt"
-#        grouping:
-#            streamId: "geo"
-#            type: FIELDS
-#            args: ["key"]
-#
+     #send the data to be enriched from the splitter to the geo adapter
+    -   name: "enrichmentSplit -> geo"
+        from: "enrichmentSplitBolt"
+        to: "geoEnrichmentBolt"
+        grouping:
+            streamId: "geo"
+            type: FIELDS
+            args: ["key"]
+     #send the data to be enriched from the splitter to the grpc adapter
+    -   name: "enrichmentSplit -> grpc"
+        from: "enrichmentSplitBolt"
+        to: "grpcEnrichmentBolt"
+        grouping:
+            streamId: "grpc"
+            type: FIELDS
+            args: ["key"]
+     #send the data to be enriched from the splitter to the hbase adapter
 #    -   name: "enrichmentSplit -> simpleHBaseEnrichmentBolt"
 #        from: "enrichmentSplitBolt"
 #        to: "simpleHBaseEnrichmentBolt"
@@ -345,22 +406,37 @@ streams:
 #            type: FIELDS
 #            args: ["key"]
 #
-#    -   name: "splitter -> join"
-#        from: "enrichmentSplitBolt"
-#        to: "enrichmentJoinBolt"
-#        grouping:
-#            streamId: "message"
-#            type: FIELDS
-#            args: ["key"]
-#    -   name: "geo -> join"
-#        from: "geoEnrichmentBolt"
-#        to: "enrichmentJoinBolt"
-#        grouping:
-#            streamId: "geo"
-#            type: FIELDS
-#            args: ["key"]
+     #get the un-enriched data from the splitter to the join
+     #so that we retain the original message in the final message
+    -   name: "splitter -> join"
+        from: "enrichmentSplitBolt"
+        to: "enrichmentJoinBolt"
+        grouping:
+            streamId: "message"
+            type: FIELDS
+            args: ["key"]
+     #get the data from the geo enricher to the join so we
+     #can add those fields to the final message
+    -   name: "geo -> join"
+        from: "geoEnrichmentBolt"
+        to: "enrichmentJoinBolt"
+        grouping:
+            streamId: "geo"
+            type: FIELDS
+            args: ["key"]
+     #get the data from the grpc enricher to the join so we
+     #can add those fields to the final message
+    -   name: "grpc -> join"
+        from: "grpcEnrichmentBolt"
+        to: "enrichmentJoinBolt"
+        grouping:
+            streamId: "grpc"
+            type: FIELDS
+            args: ["key"]
+
 #
-#
+     #get the data from the hbase enricher to the join so we
+     #can add those fields to the final message
 #    -   name: "simpleHBaseEnrichmentBolt -> join"
 #        from: "simpleHBaseEnrichmentBolt"
 #        to: "enrichmentJoinBolt"
@@ -368,6 +444,9 @@ streams:
 #            streamId: "hbaseEnrichment"
 #            type: FIELDS
 #            args: ["key"]
+#
+     #get the data from the host enricher to the join so we
+     #can add those fields to the final message
 #    -   name: "host -> join"
 #        from: "hostEnrichmentBolt"
 #        to: "enrichmentJoinBolt"
@@ -377,6 +456,10 @@ streams:
 #            args: ["key"]
 #
 ##threat intel
+#after the enrichments happen, pass the message on to the
+#bolts for threat enrichment
+#
+     #send the data from the enrichment joiner to the threat intel splitter
 #    -   name: "enrichmentJoin -> threatSplit"
 #        from: "enrichmentJoinBolt"
 #        to: "threatIntelSplitBolt"
@@ -385,6 +468,7 @@ streams:
 #            type: FIELDS
 #            args: ["key"]
 #
+     #send data from the threat splitter to the thread into bolt
 #    -   name: "threatSplit -> simpleHBaseThreatIntel"
 #        from: "threatIntelSplitBolt"
 #        to: "simpleHBaseThreatIntelBolt"
@@ -393,6 +477,7 @@ streams:
 #            type: FIELDS
 #            args: ["key"]
 #
+     #send the stream from the threat intel bolt to the joiner bolt
 #    -   name: "simpleHBaseThreatIntel -> join"
 #        from: "simpleHBaseThreatIntelBolt"
 #        to: "threatIntelJoinBolt"
@@ -400,6 +485,7 @@ streams:
 #            streamId: "hbaseThreatIntel"
 #            type: FIELDS
 #            args: ["key"]
+     #send the stream from the threat splitter to the joiner bolt
 #    -   name: "threatIntelSplit -> threatIntelJoin"
 #        from: "threatIntelSplitBolt"
 #        to: "threatIntelJoinBolt"
@@ -408,6 +494,7 @@ streams:
 #            type: FIELDS
 #            args: ["key"]
 ##indexing
+     #send the data to from the threat intel join bolt to the index bolt
 #    -   name: "threatIntelJoin -> indexing"
 #        from: "threatIntelJoinBolt"
 #        to: "indexingBolt"
@@ -423,13 +510,16 @@ streams:
 #            streamId: "message"
 #            type: SHUFFLE
 
-    -   name: "enrichmentSplitBolt -> indexingBolt"
-        from: "enrichmentSplitBolt"
-        to: "indexingBolt"
-        grouping:
-            streamId: "message"
-            type: SHUFFLE
+    #send the data straight from the enrichment split bolt to the indexing bolt
+    #use this if you want to skip enrichment
+#    -   name: "enrichmentSplitBolt -> indexingBolt"
+#        from: "enrichmentSplitBolt"
+#        to: "indexingBolt"
+#        grouping:
+#            streamId: "message"
+#            type: SHUFFLE
 
+    #send any errors from the indexing bolt to the error bolt
     -   name: "indexingBolt -> errorBolt"
         from: "indexingBolt"
         to: "errorBolt"

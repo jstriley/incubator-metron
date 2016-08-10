@@ -3,15 +3,12 @@
   "batchSize": 1000,
   "enrichment": {
     "fieldMap": {
-      "geo": [
-        "ip_src_addr"
-      ],
-      "host": [
-        "ip_src_addr"
-    ]
+      "grpc": [
+        "url"
+      ]
   },
   "fieldToTypeMap": {
-      "ip_src_addr": [
+      "url": [
         "playful_classification"
       ]
     }
