@@ -52,6 +52,7 @@ public class BasicCylanceParser extends BasicParser {
             valueSegments = Arrays.copyOfRange(parts, 1, parts.length);
           }
 
+          valueSegments = lookAheadClean(valueSegments); //Handles the case when there are two names for event name - split doesnt handle it
           for (int i = 0; i < valueSegments.length; i++){
             String[] keyValue = valueSegments[i].split(":", 2);
 
@@ -72,5 +73,27 @@ public class BasicCylanceParser extends BasicParser {
             LOGGER.error("Failed to parse: " + message);
           throw new IllegalStateException("Unable to Parse Cylance Message: " + message + " due to " + e.getMessage(), e);
         }
+    }
+    public String[] lookAheadClean(String[] values)
+    {
+        ArrayList<String> value = new ArrayList();
+        int count = 0;
+        for(int i =0; i< values.length; i++)
+        {
+            if(!values[i].contains(":"))
+            {
+
+                ++count;
+
+                value.set(i-count,value.get(i-count)+","+values[i]);
+            }
+            else
+            {
+                value.add(values[i]);
+            }
+        }
+        String[] cleanedArray = value.toArray(new String[0]);
+        return cleanedArray;
+
     }
 }

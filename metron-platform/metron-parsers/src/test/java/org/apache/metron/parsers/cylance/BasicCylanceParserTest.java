@@ -55,6 +55,7 @@ public class BasicCylanceParserTest {
     assertEquals(parsedJSON.get("os"), "MAC OS X El Capitan 10.11.5 x64 10.11.5");
   }
 
+
   @Test
   public void testEventNameResearchSaved() throws Exception {
     BasicCylanceParser cylanceParser = new BasicCylanceParser();
@@ -144,5 +145,35 @@ public class BasicCylanceParserTest {
     assertEquals(parsedJSON.get("is_running"), "False");
     assertEquals(parsedJSON.get("auto_run"), "False");
     assertEquals(parsedJSON.get("detected_by"), "FileWatcher");
+  }
+
+  @Test
+  public void testEventMultiEventNameSecurity() throws Exception {
+    BasicCylanceParser cylanceParser = new BasicCylanceParser();
+    String testString = "<116>Aug 10 14:59:44 sysloghost CylancePROTECT Event Type: Device, Event Name: SystemSecurity, Device Name: Ely, Travis, Agent Version: 1.2.1380.538, IP Address: (10.120.159.245), MAC Address: (326AC0E3CBF7, 80E6500DB150), Logged On Users: (harrryypott), OS: MAC OS X El Capitan 10.11.5 x64 10.11.5#015";
+
+    List<JSONObject> result = null;
+    try {
+      result = cylanceParser.parse(testString.getBytes());
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail();
+    }
+
+    JSONObject parsedJSON = result.get(0);
+    System.out.println(parsedJSON);
+
+    assertEquals(parsedJSON.get("priority"), "116");
+    assertEquals(parsedJSON.get("timestamp"), 1470841184000L);
+    assertEquals(parsedJSON.get("hostname"), "sysloghost");
+    assertEquals(parsedJSON.get("process"), "CylancePROTECT");
+    assertEquals(parsedJSON.get("event_type"), "Device");
+    assertEquals(parsedJSON.get("event_name"), "SystemSecurity");
+    assertEquals(parsedJSON.get("device_name"), "Ely, Travis");
+    assertEquals(parsedJSON.get("agent_version"), "1.2.1380.538");
+    assertEquals(parsedJSON.get("ip_address"), "10.120.159.245");
+    assertEquals(parsedJSON.get("mac_address"), "326AC0E3CBF7, 80E6500DB150");
+    assertEquals(parsedJSON.get("logged_on_users"), "harrryypott");
+    assertEquals(parsedJSON.get("os"), "MAC OS X El Capitan 10.11.5 x64 10.11.5");
   }
 }
