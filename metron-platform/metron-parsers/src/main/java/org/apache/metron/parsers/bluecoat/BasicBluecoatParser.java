@@ -19,11 +19,7 @@
 package org.apache.metron.parsers.bluecoat;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.metron.parsers.BasicParser;
 import org.json.simple.JSONObject;
@@ -60,6 +56,7 @@ public class BasicBluecoatParser extends BasicParser {
 			payload.put("priority", parts[1]);
 			
 			int year = Calendar.getInstance().get(Calendar.YEAR);
+			df.setTimeZone(TimeZone.getTimeZone("UTC"));
 			Date date = df.parse(parts[2] + " " + parts[3] + " " + year + " "+ parts[4]);
 		    long epoch = date.getTime();
 		    	    
