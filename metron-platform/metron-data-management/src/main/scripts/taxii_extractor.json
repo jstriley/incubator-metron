@@ -1,0 +1,6 @@
+{
+  "config" : {
+    "stix_address_categories" : "IPV_4_ADDR"
+  }
+,"extractor" : "STIX"
+}

@@ -1,0 +1,14 @@
+{
+  "zkQuorum" : "ip-205-241-82.dqa.capitalone.com:2181"
+,"sensorToFieldList" : {
+  "checkpoint_traffic" : {
+    "type" : "THREAT_INTEL"
+  ,"fieldToEnrichmentTypes" : {
+      "ip_src_addr" : [ "malicious_ip" ]
+    ,"ip_dst_addr" : [ "malicious_ip" ]
+    ,  "ip_src_addr":["address:IPV_4_ADDR"]
+    , "ip_dst_addr":["address:IPV_4_ADDR"]
+    }
+  }
+}
+}
