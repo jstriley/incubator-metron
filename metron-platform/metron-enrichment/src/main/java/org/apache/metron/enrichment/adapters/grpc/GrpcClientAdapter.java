@@ -20,8 +20,6 @@
 
 package org.apache.metron.enrichment.adapters.grpc;
 
-import org.apache.metron.enrichment.adapters.grpc.generated.Feature;
-import org.apache.metron.enrichment.adapters.simplehbase.SimpleHBaseAdapter;
 import org.apache.metron.enrichment.bolt.CacheKey;
 import org.apache.metron.enrichment.interfaces.EnrichmentAdapter;
 import org.json.simple.JSONObject;

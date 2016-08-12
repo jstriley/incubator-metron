@@ -22,7 +22,6 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import org.apache.metron.enrichment.adapters.grpc.generated.EnrichGrpc;
-import org.apache.metron.enrichment.adapters.grpc.generated.GrpcEnrichment;
 
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;

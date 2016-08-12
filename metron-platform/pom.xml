@@ -62,6 +62,7 @@
 	</licenses>
 	<modules>
 		<module>metron-common</module>
+		<module>grpc-shaded</module>
 		<module>metron-enrichment</module>
 		<module>metron-solr</module>
 		<module>metron-parsers</module>
