@@ -1,6 +1,14 @@
 {
   "parserClassName": "org.apache.metron.parsers.soltra.SoltraParser",
+  "writerClassName": "org.apache.metron.writer.hbase.SimpleHbaseEnrichmentWriter",
   "sensorTopic": "soltra",
-  "parserConfig": {
+  "parserConfig":    {
+    "shew.table" : "soltra"
+  ,"shew.cf" : "column_family"
+  ,"shew.keyColumns" : "IP_Range_From"
+  ,"shew.enrichmentType" : "soltra"
+  ,"columns" : {
+      "IP_Range_From" : 0
+    }
   }
 }
