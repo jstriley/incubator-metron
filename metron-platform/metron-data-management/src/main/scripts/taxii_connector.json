@@ -1,0 +1,11 @@
+{
+  "endpoint" : "http://10.204.4.19:80/taxii-discovery-service"
+,"type" : "DISCOVER"
+,"port" : "80"
+,"collection" : "system.Default"
+,"username" : "username"
+,"password" : "password"
+,"table" : "threat_intel"
+,"columnFamily" : "cf"
+,"allowedIndicatorTypes" : [ "domainname:FQDN", "address:IPV_4_ADDR" ]
+}
