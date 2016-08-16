@@ -3,14 +3,16 @@ MONTH \d\d
 
 # Days - two digit number is used
 DAY \d\d
-
+TWODIG \d\d
 YEAR \d\d\d\d
 
 # Time - two digit hour, minute, second and milliseconds as a decimal
 TIME \d{2}:\d{2}:\d{2}(\.\d{0,3})?
+#TIME \d\d:\d\d:\d\d\.\d\d\d
+EXTRATIMEDIGITS \d*
 
 # Timestamp - month, day, and time
-TIMESTAMP %{YEAR:UNWANTED}-%{MONTH:UNWANTED}-%{DAY:UNWANTED}T%{TIME:UNWANTED}
+TIMESTAMP %{YEAR:UNWANTED}-%{TWODIG:UNWANTED}-%{TWODIG:UNWANTED}T%{TIME:UNWANTED}
 
 # Generic word field
 WORD \w+
@@ -23,7 +25,11 @@ MESSAGE .*
 
 TAG .*?
 
-EXTRAINFO .*?
+STRUCTUREDDATA -|\[.*\]
 
-# RFC3164 - the entire log message
-UNIXSYSLOG5424 <%{PRIORITY:priority}>%{TIMESTAMP:timestamp_string}Z %{TAG:hostname} %{TAG:tag}: (\[%{EXTRAINFO:extra_info}\] )?%{MESSAGE:message}
+APPNAME -|\w{1,48}
+PROCID -|\w{1,128}
+MSGID -|\w{1,32}
+
+# UNIXSYSLOG5424 - the entire RFC 5424 log message
+UNIXSYSLOG5424 <%{PRIORITY:priority}>%{PRIORITY:version} %{TIMESTAMP:timestamp_string}%{EXTRATIMEDIGITS:UNWANTED}Z %{TAG:hostname} %{APPNAME:app_name} %{PROCID:process_id} %{MSGID:message_id} %{STRUCTUREDDATA:structured_data} %{MESSAGE:message}

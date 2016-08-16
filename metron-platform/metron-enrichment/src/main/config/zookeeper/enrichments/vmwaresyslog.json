@@ -1,0 +1,7 @@
+{
+  "index": "vmwaresyslog",
+  "batchSize": 200,
+  "enrichment": {
+  }
+}
+

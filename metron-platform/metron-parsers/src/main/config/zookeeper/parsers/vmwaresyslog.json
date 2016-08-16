@@ -1,0 +1,11 @@
+{
+  "parserClassName":"org.apache.metron.parsers.vmwaresyslog.GrokVMWareSyslogParser",
+  "sensorTopic":"vmwaresyslog",
+  "parserConfig":
+  {
+    "grokPath":"/patterns/vmwaresyslog",
+    "patternLabel":"VMWARESYSLOG",
+    "timestampField":"timestamp_string",
+    "dateFormat":"yyyy-MM-dd'T'HH:mm:ss.SSS"
+  }
+}
